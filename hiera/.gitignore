@@ -1,0 +1,6 @@
+control-center.*.yaml
+kafka.*.yaml
+kafka-connect.*.yaml
+zookeeper.*.yaml
+zookeeper_common.yaml
+schema-registry.*.yaml

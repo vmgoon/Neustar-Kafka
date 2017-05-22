@@ -2,9 +2,14 @@ yum install --downloadonly java-1.8.0-openjdk
 puppet resource yumrepo Confluent.dist ensure=present 'baseurl=http://packages.confluent.io/rpm/3.2/7' 'descr=Confluent repository (dist)' enabled=1 gpgcheck=1 'gpgkey=http://packages.confluent.io/rpm/3.2/archive.key'
 puppet resource yumrepo Confluent ensure=present 'baseurl=http://packages.confluent.io/rpm/3.2' 'descr=Confluent repository' enabled=1 gpgcheck=1 'gpgkey=http://packages.confluent.io/rpm/3.2/archive.key'
 yum --disablerepo=\* --enablerepo=Confluent --exclude=confluent-kafka-2.10,confluent-platform-oss\*,confluent-platform-2.10 install -y --downloadonly \*
+yum install -y wget
 
-wget -O /tmp/puppet-confluent-inital.tar.gz 'https://codeload.github.com/jcustenborder/puppet-confluent/tar.gz/inital'
-tar -xzf /tmp/puppet-confluent-inital.tar.gz -C /tmp
-mv /tmp/puppet-confluent-inital /etc/puppet/modules/confluent
+wget -O /tmp/puppet-confluent-master.tar.gz 'https://codeload.github.com/jcustenborder/puppet-confluent/tar.gz/master'
+tar -xzf /tmp/puppet-confluent-master.tar.gz -C /tmp
+mv /tmp/puppet-confluent-master /etc/puppet/modules/confluent
+
+puppet module install puppetlabs-stdlib --version 4.17.0
+puppet module install puppetlabs-inifile --version 1.6.0
+puppet module install fiddyspence-sysctl --version 1.1.0
 
 centos7_confluent_3.2.1_x86_64

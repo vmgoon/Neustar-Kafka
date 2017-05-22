@@ -2,7 +2,8 @@
 require 'yaml'
 
 server_id = ARGV[0]
-zookeeper_hosts = ARGV[1]
+broker_ip = ARGV[1]
+zookeeper_hosts = ARGV[2]
 
 INPUT_FILE = File.join('hiera', 'zookeeper_common.yaml')
 OUTPUT_FILE = File.join('hiera', "kafka.#{server_id}.yaml")
@@ -20,6 +21,18 @@ settings = {
         },
         'auto.create.topics.enable' => {
             'value' => false
+        },
+        'advertised.listeners' => {
+            'value' => "PLAINTEXT://#{broker_ip}:9092"
+        },
+        'metric.reporters' => {
+            'value' => 'io.confluent.metrics.reporter.ConfluentMetricsReporter'
+        },
+        'confluent.metrics.reporter.bootstrap.servers' => {
+            'value' => 'localhost:9092'
+        },
+        'confluent.metrics.reporter.zookeeper.connect' => {
+            'value' => zookeeper_hosts
         }
     },
     'confluent::kafka::broker::environment_settings' => {

@@ -19,6 +19,9 @@ settings = {
         },
         'confluent.controlcenter.connect.cluster' => {
           'value' => connect_hosts
+        },
+        'confluent.controlcenter.data.dir' => {
+          'value' => '/data/control-center'
         }
     }
 }

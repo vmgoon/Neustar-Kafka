@@ -60,12 +60,8 @@ resource "vsphere_virtual_machine" "zookeeper" {
   provisioner "remote-exec" {
     inline = [
       "hostnamectl set-hostname ${self.name}.${self.domain}",
+      "puppet apply /tmp/initial.pp",
     ]
-  }
-
-  provisioner "file" {
-    source = "hiera/hiera.yaml"
-    destination = "/etc/puppet/hiera.yaml"
   }
 
   provisioner "local-exec" {
@@ -127,7 +123,7 @@ resource "vsphere_virtual_machine" "broker" {
     datastore = "${var.vcenter_datastore}"
     size = 100,
     type = "thin"
-    name = "${format("broker-%02d", count.index + 1)}-data.vmdk"
+    name = "${var.environment_name}-broker-${format("%03d", count.index+1)}-data.vmdk"
   }
   memory = "${var.broker_memory_mb}"
   name = "${var.environment_name}-broker-${format("%03d", count.index+1)}"
@@ -137,15 +133,16 @@ resource "vsphere_virtual_machine" "broker" {
   }
   vcpu = "${var.broker_vcpu_count}"
 
-  provisioner "remote-exec" {
-    inline = [
-      "hostnamectl set-hostname ${self.name}.${self.domain}",
-    ]
-  }
-
   provisioner "file" {
     source = "puppet/initial.pp"
     destination = "/tmp/initial.pp"
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "hostnamectl set-hostname ${self.name}.${self.domain}",
+      "puppet apply /tmp/initial.pp",
+    ]
   }
 
   provisioner "remote-exec" {
@@ -154,13 +151,8 @@ resource "vsphere_virtual_machine" "broker" {
     ]
   }
 
-  provisioner "file" {
-    source = "hiera/hiera.yaml"
-    destination = "/etc/puppet/hiera.yaml"
-  }
-
   provisioner "local-exec" {
-    command = "./scripts/kafka/create-node-hiera.rb ${count.index} '${data.template_file.zookeeper_hosts.rendered}'"
+    command = "./scripts/kafka/create-node-hiera.rb ${count.index} '${self.network_interface.0.ipv4_address}' '${data.template_file.zookeeper_hosts.rendered}'"
   }
 
   // Init must run before we can transfer over the file.
@@ -212,12 +204,6 @@ resource "vsphere_virtual_machine" "schema_registry" {
   }
   vcpu = "${var.schema_registry_vcpu_count}"
 
-  provisioner "remote-exec" {
-    inline = [
-      "hostnamectl set-hostname ${self.name}.${self.domain}",
-    ]
-  }
-
   provisioner "file" {
     source = "puppet/initial.pp"
     destination = "/tmp/initial.pp"
@@ -225,13 +211,9 @@ resource "vsphere_virtual_machine" "schema_registry" {
 
   provisioner "remote-exec" {
     inline = [
+      "hostnamectl set-hostname ${self.name}.${self.domain}",
       "puppet apply /tmp/initial.pp",
     ]
-  }
-
-  provisioner "file" {
-    source = "hiera/hiera.yaml"
-    destination = "/etc/puppet/hiera.yaml"
   }
 
   provisioner "local-exec" {
@@ -299,12 +281,8 @@ resource "vsphere_virtual_machine" "kafka_connect" {
   provisioner "remote-exec" {
     inline = [
       "hostnamectl set-hostname ${self.name}.${self.domain}",
+      "puppet apply /tmp/initial.pp",
     ]
-  }
-
-  provisioner "file" {
-    source = "hiera/hiera.yaml"
-    destination = "/etc/puppet/hiera.yaml"
   }
 
   provisioner "local-exec" {
@@ -352,6 +330,12 @@ resource "vsphere_virtual_machine" "control_center" {
     template = "${var.template_name}"
     type = "thin"
   }
+  "disk" {
+    datastore = "${var.vcenter_datastore}"
+    size = 250,
+    type = "thin"
+    name = "${var.environment_name}-control-center-${format("%03d", count.index+1)}-data.vmdk"
+  }
   memory = "${var.control_center_memory_mb}"
   name = "${var.environment_name}-control-center-${format("%03d", count.index+1)}"
   domain = "${var.domain_name}"
@@ -368,12 +352,8 @@ resource "vsphere_virtual_machine" "control_center" {
   provisioner "remote-exec" {
     inline = [
       "hostnamectl set-hostname ${self.name}.${self.domain}",
+      "puppet apply /tmp/initial.pp",
     ]
-  }
-
-  provisioner "file" {
-    source = "hiera/hiera.yaml"
-    destination = "/etc/puppet/hiera.yaml"
   }
 
   provisioner "local-exec" {

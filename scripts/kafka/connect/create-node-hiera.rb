@@ -25,6 +25,12 @@ settings = {
         'value.converter.schema.registry.url' => {
             'value' => schema_registry_hosts
         },
+        'consumer.interceptor.classes' => {
+            'value' => 'io.confluent.monitoring.clients.interceptor.MonitoringConsumerInterceptor'
+        },
+        'producer.interceptor.classes' => {
+            'value' => 'io.confluent.monitoring.clients.interceptor.MonitoringProducerInterceptor'
+        }
     }
 }
 
